@@ -6,14 +6,13 @@ Proper-motion membership for open clusters
 
 When you clone this repo there are 3 main sections inside open_clusters alongside some scripts/files that Docker needs:
 
--Dockerfile
--Makefile
--requirements.txt
--pm_membership.py
--README.md
-
--/data
--/data/out
+Dockerfile,
+Makefile,
+requirements.txt,
+pm_membership.py,
+README.md,
+/data,
+/data/out
 
 
 To run the entire process, assuming you have Docker working on your machine: In the same directory as the Docker file, run this command in a terminal, "make run". This will build the docker image, run container from the image, and run the python script in it's entirety.
