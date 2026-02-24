@@ -49,42 +49,53 @@ When finished, any output data will automatically be placed in an "out" subdirec
 
 1) Load and isolate motion data:
 We read our catalog and extract only:
+
 pmrapmdecIf either is missing, we drop the star because we cannot judge its kinematic allegiance without both velocity components
 
 2) Assume two overlapping populations:
+
 We assume every star belongs to one of two kinematic species:
 A tight cluster distributionA broad Galactic field distributionWe model both as 2D Gaussians in proper-motion space
 
 3) Define and freeze the field:
+
 We estimate the global mean and covariance of the full sample, inflate the dispersion, and freeze this as our field model. We lock it to prevent the field from reshaping itself around the cluster during fitting.
 
 4) Seed the cluster center:
+
 We find the global median motion, select the densest ~15% of stars near it, and use their median as our initial cluster center. This gives us a robust starting guess for the kinematic peak.
 
 5) Estimate initial cluster dispersion:
+
 From stars nearest that center, we estimate a characteristic velocity spread. This defines our first cluster Gaussian
 
 6) Compute membership probabilities:
+
 For each star, we compute:
 Cluster likelihood and Field likelihood
 We combine them using Bayes’ theorem with a fixed prior (π = 0.15) to obtain: P(cluster∣motion)
 Each star now has a soft membership weight between 0 and 1
 
 7) Refit the cluster (weighted update):
+
 We use the probabilities as weights to recompute:
 The cluster centerThe covariance matrixHigh-probability stars pull harder. Low-probability stars barely tug
 
 8) Iterate to convergence:
+
 We repeat probability calculation and refitting until the cluster center stops shifting beyond a tolerance. At that point, the model and its members are self-consistent
 
 9) Measure Mahalanobis distance:
+
 Using the final covariance, we compute each star’s elliptical distance from the cluster center. This measures separation in units of the cluster’s natural velocity shape
 
 10) Assign membership tiers:
+
 We discretize the continuous probabilities:
 ≥ 0.9 → Core0.5–0.9 → Probable0.2–0.5 → Candidate< 0.2 → FieldThese are confidence labels layered on top of the Bayesian posterior
 
 11) Validate with CMD:
+
 We plot a color–magnitude diagram using our tiers
 If our kinematic model is correct, core members trace a clean main sequence while field stars scatter chaotically
 
