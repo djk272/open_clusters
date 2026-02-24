@@ -47,22 +47,6 @@ When finished, any output data will automatically be placed in an "out" subdirec
 
 ## pm_membership.py
 
-I did a search for old open clusters (I define old as > 1 Gyr) that fall within the footprint of the Zwicky transient factory (ZTF). Why this survey? Because it has multiple filters and epochs of photometry for the stars associated with these clusters. I then retrieved all the objects that have GIAI information within the area of the cluster (plus some amount). This results in 73 open clusters.
-
-The tasks that need to be done are to define members to the clusters based on the GAIA proper motions. In most cases there is a clear separation between the field population and the cluster. In the cases where there isn’t a clear separation we will put those clusters aside for now. 
-
-We need to define the membership portability for the stars associated with the cluster(s). 
-
-Once we do that then I’d like to match the objects with the photometry from the ZTF. If there are other surveys that could add information like GALEX for example I’d like to match that as well. 
-
-What are the end goals? 
-
-Identification of the blue straggler population, subsubgiant population, variables, etc. I’d like to identify variability and the spectral energy distributions for all those sources that are member of the clusters.
-
-I think a lot of this can be somewhat automated. I think the first thing might be to define how membership probability is determined. There are papers that can be found that do this I can find them or you can.
-
-
-Forgot to add this in:
 1) Load and isolate motion data
 We read our catalog and extract only:
 pmrapmdecIf either is missing, we drop the star because we cannot judge its kinematic allegiance without both velocity components
