@@ -4,7 +4,7 @@ Automate the the identification of the blue straggler population, subsubgiant po
 Search a catalog of old open clusters (> 1 Gyr) that fall within the catalog of the Zwicky transient factory (ZTF). Because ZTF has multiple filters and epochs of photometry for the stars associated with these clusters. 
 
 Then retrieve all the objects that have GAIA information within the area of the cluster.
-Then define members to the clusters based on the GAIA proper motions,and define the membership probability for the stars associated with the clusters. 
+Then define members to the clusters based on the GAIA proper motions, and define the membership probability for the stars associated with the clusters. 
 
 Then match those objects back with the photometry from ZTF, and other surveys that could add information.
 
