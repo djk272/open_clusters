@@ -3,3 +3,14 @@ numpy
 pandas
 pathlib
 matplotlib
+astroquery
+astropy >=5.0
+pyVO >=1.5
+requests
+keyring
+bs4
+html5lib
+astropy-healpix
+regions
+mocpy >= 0.9
+boto3
