@@ -8,6 +8,7 @@ RUN mkdir /root/open_clusters/
 WORKDIR /root/open_clusters/
 COPY requirements.txt .
 COPY pm_membership.py .
+COPY cluster_catalog_search.py .
 COPY catalog_match_cluster_members.py .
 
 #Install any requirements
@@ -18,7 +19,8 @@ RUN python -m pip install -r requirements.txt
 #Run python program
 
 #CMD [ "python", "./pm_membership.py"]
-CMD [ "python", "./catalog_match_cluster_members.py" ]
+#CMD [ "python", "./catalog_match_cluster_members.py" ]
+CMD [ "python", "./cluster_catalog_search.py" ]
 
 
 ##For every change to this file you must 
