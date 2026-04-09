@@ -7,10 +7,11 @@ from astropy.coordinates import SkyCoord
 from astroquery.ipac.irsa import Irsa
 from pathlib import Path
 import glob
+import math
 
 # Path to input files
 
-DEFAULT_CSV = Path.home() / "open_clusters" / "data" / "out" / "NGC2682_M67_result_with_membership.csv"
+INPUT_CSV = Path.home() / "open_clusters" / "data" / "out" / "NGC2682_M67_result_with_membership.csv"
 
 # Get a list of all files in the directory
 # Get a list of filenames matching a pattern
@@ -19,7 +20,7 @@ DEFAULT_CSV = Path.home() / "open_clusters" / "data" / "out" / "NGC2682_M67_resu
 
 # Load the CSV file into a DataFrame
 # the path to one CSV so far to test, open_clusters/data/out/NGC2682_M67_result_with_membership.csv
-df = pd.read_csv(DEFAULT_CSV)
+df = pd.read_csv(INPUT_CSV)
 
 ra_column_name = 'ra'
 
@@ -44,21 +45,17 @@ center_ra = (ra_max_value + ra_min_value)/2
 
 # Find center value for Dec
 
-center_dec = (dec_max_value+dec_min_value)/2
+center_dec = (dec_max_value + dec_min_value)/2
 
 
 
-# 1. Define the search center (e.g., the Andromeda Galaxy M31)
-# The coordinates can be specified by name (resolved online) or as RA/Dec values.
-#center_coord = SkyCoord.from_name("M31", frame="icrs")
-#print(f"Searching around coordinates: {center_coord.ra.deg} RA, {center_coord.dec.deg} Dec\n")
-
-# Alternatively, specify coordinates directly
+# 1. Define the search center, specify coordinates directly
 center_coord = SkyCoord(ra=center_ra, dec=center_dec, unit='deg', frame='icrs')
 print(f"Searching around coordinates: {center_coord.ra.deg} RA, {center_coord.dec.deg} Dec\n")
 
-# 2. Define the search radius
-radius = 0.1 * u.deg # 0.1 degrees radius
+# 2. Define the search radius #Find the radius using the the center which of the 2 differences is larger, that will be the radius for the cone
+#search. (decmax-center_dec), (ramax-center_ra).
+radius = math.sqrt((dec_max_value-center_dec)**2 + (ra_max_value-center_ra)**2) * u.deg # 0.1 degrees radius
 
 # 3. Perform the cone search
 # 'catalog' parameter specifies which catalog to search.
@@ -66,7 +63,7 @@ radius = 0.1 * u.deg # 0.1 degrees radius
 results_table = Irsa.query_region(
     center_coord,
     radius=radius,
-    catalog='ztf_objects_dr20', # Example catalog (ZTF DR20 Objects source catalog)
+    catalog='fp_psc', # Example catalog (2MASS All-Sky Point Source Catalog (PSC)')
     spatial='Cone'
 )
 
@@ -74,7 +71,7 @@ results_table = Irsa.query_region(
 
 output_path = Path.home() / "open_clusters" / "data" / "out"
 
-results_table.write(str(output_path)+'/output_catalog_search.csv', format='csv', overwrite=True)
+results_table.write(str(output_path)+'/output_catalog_search.ecsv', format='ecsv', overwrite=True)
 
 print(f"Found {len(results_table)} objects within the search radius.")
 if len(results_table) > 0:
