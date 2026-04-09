@@ -49,7 +49,7 @@ cone_search_coords = SkyCoord(cone_search_ra, cone_search_dec, unit="deg", frame
 cmember_coords = SkyCoord(cmember_ra, cmember_dec, unit="deg", frame='icrs')
 
 # 5 matching the catalogs
-max_sep = 5 * u.arcsec
+max_sep = 2 * u.arcsec
 idx_cone_search, sep2d, _ = cmember_coords.match_to_catalog_sky(cone_search_coords)
 sep_constraint = sep2d < max_sep
 catalog_matches = cone_search_table[idx_cone_search[sep_constraint]]
