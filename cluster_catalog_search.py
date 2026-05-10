@@ -5,9 +5,11 @@ import pandas as pd
 from astropy.table import Table
 from astropy.coordinates import SkyCoord
 from astroquery.ipac.irsa import Irsa
+from astroquery.mast import Mast
 from pathlib import Path
 import glob
 import math
+import json
 
 # Path to input files
 
@@ -60,11 +62,25 @@ radius = math.sqrt((dec_max_value-center_dec)**2 + (ra_max_value-center_ra)**2) 
 # 3. Perform the cone search
 # 'catalog' parameter specifies which catalog to search.
 # The 'Cone' spatial parameter indicates a cone search.
-results_table = Irsa.query_region(
-    center_coord,
-    radius=radius,
-    catalog='fp_psc', # Example catalog (2MASS All-Sky Point Source Catalog (PSC)')
-    spatial='Cone'
+# results_table = Irsa.query_region(
+#     center_coord,
+#     radius=radius,
+#     catalog='fp_psc', # Example catalog (2MASS All-Sky Point Source Catalog (PSC)')
+#     spatial='Cone'
+# )
+
+# JSON library only supports basic types like strings, integers, and dictionaries. 
+# Complex objects like Quantity (Ra and Dec have units) must be converted to a serializable format 
+# before saving or sending them as JSON. 
+json_ra = float(center_ra)
+json_dec = float(center_dec)
+json_radius = radius.value
+
+# Mast_query Sends a request to the MAST server and returns the response(in JSON).
+results_table = Mast.mast_query('Mast.Galex.Catalog', 
+                                ra=json_ra, 
+                                dec=json_dec, 
+                                radius=json_radius
 )
 
 # 4. Process the results (results are returned as an Astropy Table)
