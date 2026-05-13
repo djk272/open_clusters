@@ -10,17 +10,23 @@ COPY requirements.txt .
 COPY pm_membership.py .
 COPY cluster_catalog_search.py .
 COPY catalog_match_cluster_members.py .
+COPY run.sh .
 
 #Install any requirements
 
 RUN python -m pip install --upgrade pip
 RUN python -m pip install -r requirements.txt
+RUN chmod +x run.sh
+
 
 #Run python program
+# Execute the shell script
+
+#CMD ["./run.sh"]
 
 #CMD [ "python", "./pm_membership.py"]
-#CMD [ "python", "./cluster_catalog_search.py" ]
-CMD [ "python", "./catalog_match_cluster_members.py" ]
+CMD [ "python", "./cluster_catalog_search.py" ]
+#CMD [ "python", "./catalog_match_cluster_members.py" ]
 
 
 ##For every change to this file you must 
