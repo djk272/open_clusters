@@ -6,6 +6,7 @@ import glob
 import math
 import json
 import warnings
+import matplotlib.pyplot as plt
 import scipy
 import numpy as np
 import pandas as pd
@@ -76,7 +77,7 @@ for cluster in cluster_names_list:
     center_dec = (dec_max_value + dec_min_value)/2
 
     # Cluster members as a table
-    cmember_table = df
+    cmember_table = QTable.read(INPUT_CSV)
 
     # RA and Dec values for cluster
     cmember_ra = cmember_table["ra"]#*u.degree
@@ -105,7 +106,7 @@ for cluster in cluster_names_list:
 
     # 4.1 Process the results (results are returned as an Astropy Table)
 
-    output_path = Path.home() / "open_clusters" / "data" / "out" / cluster
+    output_path = INITAL_INPUT_CSV / cluster
     # Create directory (and parents if needed)
     # exist_ok=True prevents an error if it already exists
     output_path.mkdir(parents=True, exist_ok=True)
@@ -172,8 +173,17 @@ for cluster in cluster_names_list:
 
         for i in iter_list:
             count += 1
-            cone_search_ra = f"cone_search_{count}_ra"
-            cone_search_dec = f"cone_search_{count}_dec"
+            if count == 1:
+                catalog = 'fp_psc'
+                cone_search_ra = cone_search_1_ra
+                cone_search_dec = cone_search_1_dec
+                cone_search_table = cone_search_table_1
+            else:
+                catalog = 'galex'
+                cone_search_ra = cone_search_2_ra
+                cone_search_dec = cone_search_2_dec
+                cone_search_table = cone_search_table_2
+            #/end of if
 
             # 4.5 We can now create a single SkyCoord object to represent all of the sources from our cone search results
             cone_search_coords = SkyCoord(cone_search_ra, cone_search_dec, unit="deg", frame='icrs')
@@ -190,7 +200,7 @@ for cluster in cluster_names_list:
             if len(catalog_matches) > 0:
                 print("5. First 5 results:")
                 print(catalog_matches[:5]) # Display selected columns
-
+            #/end of if
 
             # 6 Look at the distribution of separations (in degrees) for all of the cross-matched sources
 
@@ -202,9 +212,9 @@ for cluster in cluster_names_list:
             plt.tight_layout()
 
             # 7 Save the figure to a file
-            plt.savefig(f"{output_path}/{cluster}_sep_plot.png", dpi=150)
+            plt.savefig(f"{output_path}/{catalog}_{cluster}_sep_plot.png", dpi=150)
             plt.close()
-            print(f"7.  Saved: {cluster}_sep_plot.png\n")
+            print(f"7.  Saved: {catalog}_{cluster}_sep_plot.png\n")
 
 
 
@@ -217,19 +227,20 @@ for cluster in cluster_names_list:
             # 9 Process the results (results are returned as an Astropy Table)
             # write the reuslts to a CSV file
 
-            catalog_matches.write(f"{output_path}/{cluster}_output_matches.csv", format='csv', delimiter = ',', overwrite=True)
-
-            print(f"9. Found {len(catalog_matches)} matched objects between the catalogs.")
+            print(f"9. Found {len(catalog_matches)} objects after concating the columns.")
             if len(catalog_matches) > 0:
                 print("9. First 5 results:")
                 print(catalog_matches[:5]) # Display selected columns
+            #/end of if
+
+            catalog_matches.write(f"{output_path}/{catalog}_{cluster}_output_matches.csv", format='csv', delimiter = ',', overwrite=True)
 
 
             # 10 Extracting parallax measurements from Gaia
             parallax = catalog_matches["parallax"]  # in milliarcseconds
             distance_array = 1 / parallax  # distance array from parallax (kiloparsecs)
-            ra = catalog_matches["ra"]  # right ascension
-            dec = catalog_matches["dec"]  # declination
+            ra = catalog_matches["ra_1"]  # right ascension
+            dec = catalog_matches["dec_1"]  # declination
 
             # 10.1 Sorting data
             sorted_indices = np.argsort(distance_array)
@@ -270,9 +281,9 @@ for cluster in cluster_names_list:
             ax[1].set_ylabel("DEC (degrees)")
             ax[1].set_title("Position of Parallax Measurements Colored by Distance")
 
-            plt.savefig(f"{output_path}/{cluster}_distance_check_plot.png", dpi=150)
+            plt.savefig(f"{output_path}/{catalog}_{cluster}_distance_check_plot.png", dpi=150)
             plt.close()
-            print(f"10.4.  Saved: {cluster}_distance_check_plot.png\n")
+            print(f"10.4.  Saved: {catalog}_{cluster}_distance_check_plot.png\n")
 
             # 10.5 Finding the median parallax of the data
             cluster_median = np.nanmedian(parallax)
@@ -380,60 +391,70 @@ for cluster in cluster_names_list:
             # 12.1 combine the color information columns from 2mass and cluster member table.
             # bluer - redder color, for the color. "Mag" is for the magnitute "G" optical, "J" infrared
 
-            # Jmag = catalog_matches["j_m"]  # note that we use the index array returned above
-            Gmag = catalog_matches["phot_g_mean_mag"]
-            Bmag = catalog_matches["bp_rp"]
-            # H = catalog_matches["h_m"]
-            # K = catalog_matches["k_m"]
-            #FUVmag = catalog_matches["fuv_mag"]
-            #NUVmag = catalog_matches["nuv_mag"]
+            if count == 1:
+                Gmag = catalog_matches["phot_g_mean_mag"]
+                Bmag = catalog_matches["bp_rp"]
+            else:
+                # Jmag = catalog_matches["j_m"]  # note that we use the index array returned above
+                # H = catalog_matches["h_m"]
+                # K = catalog_matches["k_m"]
+                FUVmag = catalog_matches["fuv_mag"]
+                NUVmag = catalog_matches["nuv_mag"]
+            #/end of if
 
             #fig, axes = plt.subplots(1, 2, figsize=(10, 5))
 
-            # ax = axes[0]
-            # ax.set_title("CMD of matched M67 sources in GALEX")
-            # ax.scatter(FUVmag.value - NUVmag.value, FUVmag.value, marker="o", color="k", linewidth=0, alpha=0.5, s=1)
-            # ax.set_xlabel("$FUV - NUV$")
-            # ax.set_ylabel("$FUVmag$")
-            # ax.set_xlim(-2, 4)
-            # ax.set_ylim(20, 4)  # backwards because magnitudes!
+            if count == 1:
+                #ax = axes[1]
+                ax.set_title(f"CMD of {cluster} sources from GAIA with Isochrones")
+                ax.scatter(Bmag, Gmag, marker="x", color="k", linewidth=0.9, alpha=0.5, s=20)
+                ax.set_xlabel("B-R")
+                ax.set_ylabel("$G$")
+                ax.invert_yaxis()
+                # ax.set_xlim(0, 1.5)
+                # ax.set_ylim(14, 12)  # backwards because magnitudes!
+                ax.set_xlim(0, 3)
+                ax.set_ylim(20, 10)  # backwards because magnitudes!
+                ax.legend(fontsize=8)
 
-            #ax = axes[1]
-            ax.set_title("CMD of M67 sources from GAIA with Isochrones")
-            ax.scatter(Bmag, Gmag, marker="x", color="k", linewidth=0.9, alpha=0.5, s=20)
-            ax.set_xlabel("B-R")
-            ax.set_ylabel("$G$")
-            ax.invert_yaxis()
-            # ax.set_xlim(0, 1.5)
-            # ax.set_ylim(14, 12)  # backwards because magnitudes!
-            ax.set_xlim(0, 3)
-            ax.set_ylim(20, 10)  # backwards because magnitudes!
-            ax.legend(fontsize=8)
+                # # 12.2 Adding annotation for main sequence turnoff
+                # circle = plt.Circle(
+                #     (0.80, 12.50),
+                #     0.25,
+                #     color="red",
+                #     fill=False,
+                #     linewidth=2,
+                #     label="Main Sequence Turnoff",
+                # )
+                # ax.add_patch(circle)
+                # ax.annotate(
+                #     "Main Sequence Turnoff",
+                #     xy=(1.0, 12.50),
+                #     xytext=(1.0 + 0.05, 12.50 - 0.2),
+                #     arrowprops=dict(arrowstyle="->", color="red"),
+                #     fontsize=12,
+                #     color="red",
+                # )
 
-            # # 12.2 Adding annotation for main sequence turnoff
-            # circle = plt.Circle(
-            #     (0.80, 12.50),
-            #     0.25,
-            #     color="red",
-            #     fill=False,
-            #     linewidth=2,
-            #     label="Main Sequence Turnoff",
-            # )
-            # ax.add_patch(circle)
-            # ax.annotate(
-            #     "Main Sequence Turnoff",
-            #     xy=(1.0, 12.50),
-            #     xytext=(1.0 + 0.05, 12.50 - 0.2),
-            #     arrowprops=dict(arrowstyle="->", color="red"),
-            #     fontsize=12,
-            #     color="red",
-            # )
+                fig.tight_layout()
 
+                fig.savefig(f"{output_path}/{catalog}_{cluster}_cm_diagram_figure.png", dpi=150)
+                print(f"12.2.  Saved: {catalog}_{cluster}_cm_diagram_figure.png\n \n")
+            else:
+                # ax = axes[0]
+                ax.set_title(f"CMD of matched {cluster} sources in GALEX")
+                ax.scatter(FUVmag.value - NUVmag.value, FUVmag.value, marker="o", color="k", linewidth=0, alpha=0.5, s=1)
+                ax.set_xlabel("$FUV - NUV$")
+                ax.set_ylabel("$FUVmag$")
+                ax.set_xlim(-2, 4)
+                ax.set_ylim(20, 4)  # backwards because magnitudes!
+                ax.legend(fontsize=8)
 
-            fig.tight_layout()
+                fig.tight_layout()
 
-            fig.savefig(f"{output_path}/{cluster}_cm_diagram_figure.png", dpi=150)
-            print(f"12.2.  Saved: {cluster}_cm_diagram_figure.png\n \n")
+                fig.savefig(f"{output_path}/{catalog}_{cluster}_cm_diagram_figure.png", dpi=150)
+                print(f"12.2.  Saved: {catalog}_{cluster}_cm_diagram_figure.png\n \n")
+            #/end of if 
     except:
         pass # doing nothing on exception
         #/end of for loop
